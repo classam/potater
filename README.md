@@ -46,6 +46,7 @@ DAY 1
 * It tells me I should add the line `port in container.Configuration := 8081` to `project/build.scala`, but it doesn't tell me where. 
 * I've never seen a pattern like  `x in y := z` before. I wonder what that means. 
 * ... let's try at the end of the file, before the closing brace.
+
     [info] Loading project definition from /home/classam/code/potater/project
     [info] Compiling 1 Scala source to /home/classam/code/potater/project/target/scala-2.9.2/sbt-0.12/classes...
     [error] /home/classam/code/potater/project/build.scala:46: not found: value port
@@ -53,6 +54,7 @@ DAY 1
     [error]   ^
     [error] one error found
     [error] (compile:compile) Compilation failed
+
 * Okay, so not there. Let's look a little closer at this file. 
 * There are some symbols in here that I just plain do not understand. %%, :=, ++=... what the shit is this? 
 * Googling operators is impossible, dammit! Let's just google 
@@ -61,12 +63,14 @@ DAY 1
 * Does scala support operator overloading? If it does I am going to throw a _fit_.
 * [Oh, shit, it does.](http://stackoverflow.com/questions/1098303/what-makes-scalas-operator-overloading-good-but-cs-bad)
 * Okay, let's try putting the line here, at the end of the Settings block. That seems like a good spot. And I'll need a comma, here, too.
+
     [error] /home/classam/code/potater/project/build.scala:44: not found: value port
     [error] Error occurred in an application involving default arguments.
     [error]       port in container.Configuration := 8222
     [error]       ^
     [error] one error found
     [error] (compile:compile) Compilation failed
+
 * _Nope._
 * Default arguments? Maybe the := symbol has something to do with default arguments. [To Google!](http://www.scala-lang.org/old/node/2075) Nope.
 * Shit, it would be easier to just move Jenkins at this point. No, I should figure this out. Let's look more closely at this. 
