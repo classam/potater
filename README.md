@@ -96,3 +96,37 @@ DAY 1
 * .. apparently there is. I wonder if it did anything?
 * well, if compiled files went anywhere in this heirarchy, I bet they'd be in 'target'.  It's empty? Okay, good.
 
+
+
+DAY 4
+=====
+* Okay, sbt wasn't working on the other computer. I wonder if channel knows why.
+* Travis and Kyle together solve the problem for me. I didn't check in the hidden .lib directory, containing the vital sbt-launch.jar
+* Kyle recommends Unfiltered, too. (Jon had recommended that earlier.) Should I switch? NO SWITCHING HORSES IN MIDSTREAM. 
+* I should look at maybe deploying this on Google App Engine.
+* Apparently scalate has some gotchas when deploying with GAE - no temp space, need to precompile the templates before deployment. Check. 
+* Also 'uploads'. 
+* I'll need their SDK for that, and to do more reading. 
+* Should I use their Cloud SQL? Or deploy on App Engine Datastore? Maybe BOTH bwa ha ha ha ha
+* Okay, all of this speculative stuff is getting out of control. Let's start by just figuring out the API that I want to serve.
+
+    /users - touchpoint for auth stuff or redirect to /users/:username
+    /users/:username/subscriptions - list of all subscriptions for user
+    POST /users/:username/subscriptions/ - create new subscription
+    /users/:username/subscriptions/:subscription - list of all ArticleStubs for one subscription
+    DELETE /users/:username/subscriptions/:subscription
+    PUT /users/:username/subscriptions/:subscription - rename or tag a subscription
+    /users/:username/articlestubs - top 100 unread ArticleStubs for user
+    /users/:username/articlestubs/:articlestub - one articlestub
+    PUT /users/:username/articlestubs/:articlestub - Favourite or Read an ArticleStub
+    /users/:username/favourites - articles Favourited by the user
+    /articles/:article - complete article
+    /feeds/:feed - canonical data on a single feed
+
+    and some core objects are going to be 'User', 'ArticleStub', 'ArticleStatus', 'Article', 'Feed', 'Subscription' 
+
+* that's a start, okay. /users. Let's.. read about Scalatra auth and GAE auth.
+* GAE auth is just "Google Accounts", which is fine by me. I have one of those.
+* I have to import stuff from the google libraries to use it. Maybe getting to Hello World with Scalatra+GAE tools is next step. 
+* Oh, mother FUCK, Scalatra and GAE don't play nice together. 
+* Getting real tired of this shit. Still haven't written any damn code. 

@@ -13,5 +13,21 @@ class MyScalatraServlet extends PotaterStack {
       </body>
     </html>
   }
+
+  get("/login"){
+    <html>
+      <body>
+        <h1>Authentication code! </h1>
+      </body>
+    </html>
+  }
+
+  get("/users"){
+    <html>
+      <body>
+        <h1>Redirect to current user-page or login.</h1>
+      </body>
+    </html>
+  }
   
 }
