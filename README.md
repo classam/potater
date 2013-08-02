@@ -98,7 +98,8 @@ DAY 1
 
 
 
-DAY 4
+
+DAY 3
 =====
 * Okay, sbt wasn't working on the other computer. I wonder if channel knows why.
 * Travis and Kyle together solve the problem for me. I didn't check in the hidden .lib directory, containing the vital sbt-launch.jar
@@ -130,3 +131,5 @@ DAY 4
 * I have to import stuff from the google libraries to use it. Maybe getting to Hello World with Scalatra+GAE tools is next step. 
 * Oh, mother FUCK, Scalatra and GAE don't play nice together. 
 * Getting real tired of this shit. Still haven't written any damn code. 
+* Scalatra docs: "Here's the simplest possible case. If you want to do anything more complicated, why not just look at the source code?"
+* Unfiltered looks pretty nice, AND it works with GAE. Interesting. 
