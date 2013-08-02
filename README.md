@@ -21,7 +21,7 @@ DAY 0
  * ArticleStatus (FK ArticleStub, FK User)
 
 DAY 1
-
+DAY 1
 =====
 * Flipped through the Scala chapter of Seven Languages in Seven Weeks at high speed. I'll learn as I go. 
 * [Installation](http://www.scalatra.org/getting-started/installation.html)
@@ -145,4 +145,5 @@ DAY 3
 * I feel like I need to download the Google App-Engine SDK and then set an environment variable pointing to its location. 
 * Oh, the g8 [comes with documentation](https://github.com/unfiltered/unfiltered-gae.g8).
 * it tells me to do exactly what I figured I'd need to do.
+* And now it builds! Hello, Hello World application. 
 * It's time to go out and have fun. GIT CHECKIN
