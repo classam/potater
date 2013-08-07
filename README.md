@@ -147,3 +147,18 @@ DAY 3
 * it tells me to do exactly what I figured I'd need to do.
 * And now it builds! Hello, Hello World application. 
 * It's time to go out and have fun. GIT CHECKIN
+
+DAY 4
+=====
+* Weekend of Wine, Women and Song was fun
+* Okay, poking at the basic Unfiltered app.
+* `GET(Path("/")) =>{ Html(<h1>Hello World</h1>) }` Not half bad.
+* Okay, constructing some more complicated paths.
+* Let's build some basic classes.  Feed and ArticleStub to start.
+* Shit, the parameters can't be the same name as the fields of the class. That sucks.
+* Oh, I can use parametric values to sort of end-run around that. 
+* Okay, the first big task I think is going to be converting things into JSON.
+* Let's try to import Argonaut.io.  Do I just add it to my build file and everything else happens through magic?
+* Oh, I have to turn off sbt and turn it on again. Hey, downloading my dependencies! Neat!
+* Argonaut.io's syntax is just... cryptic.
+* lift-json looks easier. Maybe I'll try that. 
