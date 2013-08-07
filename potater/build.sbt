@@ -8,7 +8,8 @@ seq(appengineSettings: _*)
 
 libraryDependencies ++= Seq(
   "net.databinder" %% "unfiltered-filter" % "0.6.8",
-  "net.databinder" %% "unfiltered-spec" % "0.6.8" % "test"
+  "net.databinder" %% "unfiltered-spec" % "0.6.8" % "test",
+  "net.liftweb" %% "lift-json" % "2.5"
   // uncomment the following line for persistence
   //, val jdo = "javax.jdo" % "jdo2-api" % "2.3-ea"
 ) ++ Seq( // local testing

@@ -162,3 +162,22 @@ DAY 4
 * Oh, I have to turn off sbt and turn it on again. Hey, downloading my dependencies! Neat!
 * Argonaut.io's syntax is just... cryptic.
 * lift-json looks easier. Maybe I'll try that. 
+
+DAY 5
+=====
+* lift-json! Let's try that. First, we add it to build.sbt.
+* `"net.liftweb" %% "lift-json" % "XXX"`
+* No, that didn't work.  Oh, I have to replace XXX with the current version number.
+* ... which is...
+* not anywhere in the readme. What version are you? Maybe the version is one of the branches or tags?
+* there are *dozens* of those.
+* The sbt says it's looking for 2.9.2, let's try that. 
+* According to StackOverflow, 2.9.2 is the version of _SCALA_ that I'm using, not the library version. Silly me.
+* Okay.. uh.. well, the current version of lift is 2.5. Let's try that.
+* `"net.liftweb" %% "lift-json" % "2.5"` works!
+* Now it's time to learn to use their DSL.
+* `("argle"->"bargle") ~ ("number"->32)` throws an error complaining that ~ isn't supported on Strings.
+* Am I not including the right packages?
+* After about 15 minutes of poking around:  I have to `include net.liftweb.json.JsonDSL._` as well, if I want
+  access to the ~ operator.
+* And now we have working JSON output! Hooray!
