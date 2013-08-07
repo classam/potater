@@ -113,17 +113,16 @@ DAY 3
 * Okay, all of this speculative stuff is getting out of control. Let's start by just figuring out the API that I want to serve.
 
     /users - touchpoint for auth stuff or redirect to /users/:username
+    /users/:username - all settings for user
     /users/:username/subscriptions - list of all subscriptions for user
     POST /users/:username/subscriptions/ - create new subscription
     /users/:username/subscriptions/:subscription - list of all ArticleStubs for one subscription
     DELETE /users/:username/subscriptions/:subscription
     PUT /users/:username/subscriptions/:subscription - rename or tag a subscription
-    /users/:username/articlestubs - top 100 unread ArticleStubs for user
-    /users/:username/articlestubs/:articlestub - one articlestub
+    /users/:username/articles - top 100 unread ArticleStubs for user
+    /users/:username/articles/:articlestub - one articlestub
     PUT /users/:username/articlestubs/:articlestub - Favourite or Read an ArticleStub
-    /users/:username/favourites - articles Favourited by the user
     /articles/:article - complete article
-    /feeds/:feed - canonical data on a single feed
 
     and some core objects are going to be 'User', 'ArticleStub', 'ArticleStatus', 'Article', 'Feed', 'Subscription' 
 
@@ -181,3 +180,9 @@ DAY 5
 * After about 15 minutes of poking around:  I have to `include net.liftweb.json.JsonDSL._` as well, if I want
   access to the ~ operator.
 * And now we have working JSON output! Hooray!
+* Separating all of the classes into individual files... 
+* And next, we have Authentication. 
+* The GAE User page wants me to use 'getUserPrincipal' from the request object, but the
+  scala request object doesn't have getUserPrincipal.
+* is there some way for me to just dump the entire request object so that I can see it? 
+
