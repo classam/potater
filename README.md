@@ -186,3 +186,11 @@ DAY 5
   scala request object doesn't have getUserPrincipal.
 * is there some way for me to just dump the entire request object so that I can see it? 
 
+DAY 6
+=====
+* We need to get some auth all up in here.
+* When I try to use the UserServiceFactory, I get a `java.lang.NoClassDefFoundError`.  Boo! Hiss! 
+* Okay, poking around the [Ant Build Instructions](https://developers.google.com/appengine/docs/java/tools/ant) it looks like 
+   I was supposed to have been copying jars from the SDK into the WEB-INF/lib folder.  I'm surprised that this didn't come 
+   as part of the prepackaged GAE+Unfiltered build. Oh well. 
+* Yeah! The rest was a piece of pie! PIE!
