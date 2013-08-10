@@ -47,7 +47,7 @@ DAY 1
 * I've never seen a pattern like  `x in y := z` before. I wonder what that means. 
 * ... let's try at the end of the file, before the closing brace.
 
-`
+
     [info] Loading project definition from /home/classam/code/potater/project
     [info] Compiling 1 Scala source to /home/classam/code/potater/project/target/scala-2.9.2/sbt-0.12/classes...
     [error] /home/classam/code/potater/project/build.scala:46: not found: value port
@@ -55,7 +55,7 @@ DAY 1
     [error]   ^
     [error] one error found
     [error] (compile:compile) Compilation failed
-`
+
 
 * Okay, so not there. Let's look a little closer at this file. 
 * There are some symbols in here that I just plain do not understand. %%, :=, ++=... what the shit is this? 
@@ -66,14 +66,14 @@ DAY 1
 * [Oh, shit, it does.](http://stackoverflow.com/questions/1098303/what-makes-scalas-operator-overloading-good-but-cs-bad)
 * Okay, let's try putting the line here, at the end of the Settings block. That seems like a good spot. And I'll need a comma, here, too.
 
-`
+
     [error] /home/classam/code/potater/project/build.scala:44: not found: value port
     [error] Error occurred in an application involving default arguments.
     [error]       port in container.Configuration := 8222
     [error]       ^
     [error] one error found
     [error] (compile:compile) Compilation failed
-`
+
 
 * _Nope._
 * Default arguments? Maybe the := symbol has something to do with default arguments. [To Google!](http://www.scala-lang.org/old/node/2075) Nope.
@@ -96,7 +96,7 @@ DAY 1
 * .. apparently there is. I wonder if it did anything?
 * well, if compiled files went anywhere in this heirarchy, I bet they'd be in 'target'.  It's empty? Okay, good.
 
-Day 3
+Day 2
 =====
 * Picked up Kristen from Canada Place.  This gave me time to go through the first 300 pages of Odersky's Scala book. 
 * Okay, setting this up on a Windows computer... in Vagrant, so I don't have to deal with Windows poop.
@@ -104,3 +104,118 @@ Day 3
 * And curl. Wow Vagrant is lightweight. 
 * sbt isn't working. maybe if I recreate a skeleton project and run sbt from there? 
 
+DAY 3
+=====
+* Okay, sbt wasn't working on the other computer. I wonder if channel knows why.
+* Travis and Kyle together solve the problem for me. I didn't check in the hidden .lib directory, containing the vital sbt-launch.jar
+* Kyle recommends Unfiltered, too. (Jon had recommended that earlier.) Should I switch? NO SWITCHING HORSES IN MIDSTREAM. 
+* I should look at maybe deploying this on Google App Engine.
+* Apparently scalate has some gotchas when deploying with GAE - no temp space, need to precompile the templates before deployment. Check. 
+* Also 'uploads'. 
+* I'll need their SDK for that, and to do more reading. 
+* Should I use their Cloud SQL? Or deploy on App Engine Datastore? Maybe BOTH bwa ha ha ha ha
+* Okay, all of this speculative stuff is getting out of control. Let's start by just figuring out the API that I want to serve.
+
+    /users - touchpoint for auth stuff or redirect to /users/:username
+    /users/:username - all settings for user
+    /users/:username/subscriptions - list of all subscriptions for user
+    POST /users/:username/subscriptions/ - create new subscription
+    /users/:username/subscriptions/:subscription - list of all ArticleStubs for one subscription
+    DELETE /users/:username/subscriptions/:subscription
+    PUT /users/:username/subscriptions/:subscription - rename or tag a subscription
+    /users/:username/articles - top 100 unread ArticleStubs for user
+    /users/:username/articles/:articlestub - one articlestub
+    PUT /users/:username/articlestubs/:articlestub - Favourite or Read an ArticleStub
+    /articles/:article - complete article
+
+    and some core objects are going to be 'User', 'ArticleStub', 'ArticleStatus', 'Article', 'Feed', 'Subscription' 
+
+* that's a start, okay. /users. Let's.. read about Scalatra auth and GAE auth.
+* GAE auth is just "Google Accounts", which is fine by me. I have one of those.
+* I have to import stuff from the google libraries to use it. Maybe getting to Hello World with Scalatra+GAE tools is next step. 
+* Oh, mother FUCK, Scalatra and GAE don't play nice together. 
+* Getting real tired of this shit. Still haven't written any damn code. 
+* Scalatra docs: "Here's the simplest possible case. If you want to do anything more complicated, why not just look at the source code?"
+* Unfiltered looks pretty nice, AND it works with GAE. Interesting. 
+* Let's try creating a basic Unfiltered project using the GAE template...
+* Oh, I need to install sbt this time, it doesn't come with the project. I guess I could just move sbt-launch.jar to my /bin folder...
+* [Here](http://www.scala-sbt.org/release/docs/Getting-Started/Setup.html) is a handy guide for that. 
+* It won't build. 
+
+    [error] You need to set APPENGINE_SDK_HOME
+    [error] Use 'last' for the full log.
+
+* I feel like I need to download the Google App-Engine SDK and then set an environment variable pointing to its location. 
+* Oh, the g8 [comes with documentation](https://github.com/unfiltered/unfiltered-gae.g8).
+* it tells me to do exactly what I figured I'd need to do.
+* And now it builds! Hello, Hello World application. 
+* It's time to go out and have fun. GIT CHECKIN
+
+DAY 4
+=====
+* Weekend of Wine, Women and Song was fun
+* Okay, poking at the basic Unfiltered app.
+* `GET(Path("/")) =>{ Html(<h1>Hello World</h1>) }` Not half bad.
+* Okay, constructing some more complicated paths.
+* Let's build some basic classes.  Feed and ArticleStub to start.
+* Shit, the parameters can't be the same name as the fields of the class. That sucks.
+* Oh, I can use parametric values to sort of end-run around that. 
+* Okay, the first big task I think is going to be converting things into JSON.
+* Let's try to import Argonaut.io.  Do I just add it to my build file and everything else happens through magic?
+* Oh, I have to turn off sbt and turn it on again. Hey, downloading my dependencies! Neat!
+* Argonaut.io's syntax is just... cryptic.
+* lift-json looks easier. Maybe I'll try that. 
+
+DAY 5
+=====
+* lift-json! Let's try that. First, we add it to build.sbt.
+* `"net.liftweb" %% "lift-json" % "XXX"`
+* No, that didn't work.  Oh, I have to replace XXX with the current version number.
+* ... which is...
+* not anywhere in the readme. What version are you? Maybe the version is one of the branches or tags?
+* there are *dozens* of those.
+* The sbt says it's looking for 2.9.2, let's try that. 
+* According to StackOverflow, 2.9.2 is the version of _SCALA_ that I'm using, not the library version. Silly me.
+* Okay.. uh.. well, the current version of lift is 2.5. Let's try that.
+* `"net.liftweb" %% "lift-json" % "2.5"` works!
+* Now it's time to learn to use their DSL.
+* `("argle"->"bargle") ~ ("number"->32)` throws an error complaining that ~ isn't supported on Strings.
+* Am I not including the right packages?
+* After about 15 minutes of poking around:  I have to `include net.liftweb.json.JsonDSL._` as well, if I want
+  access to the ~ operator.
+* And now we have working JSON output! Hooray!
+* Separating all of the classes into individual files... 
+* And next, we have Authentication. 
+* The GAE User page wants me to use 'getUserPrincipal' from the request object, but the
+  scala request object doesn't have getUserPrincipal.
+* is there some way for me to just dump the entire request object so that I can see it? 
+
+DAY 6
+=====
+* We need to get some auth all up in here.
+* When I try to use the UserServiceFactory, I get a `java.lang.NoClassDefFoundError`.  Boo! Hiss! 
+* Okay, poking around the [Ant Build Instructions](https://developers.google.com/appengine/docs/java/tools/ant) it looks like 
+   I was supposed to have been copying jars from the SDK into the WEB-INF/lib folder.  I'm surprised that this didn't come 
+   as part of the prepackaged GAE+Unfiltered build. Oh well. 
+* Yeah! The rest was a piece of pie! PIE!
+
+DAY 7
+=====
+* What's next? On the wall I have Hello World (done), JSON (done), Authentication (done), Backend, RSS consume, Storage...
+* I suspect that creating a backend to consume a RSS feed is the way to go. But it's friiiidaaaaaay nyeeeeh. 
+* It looks like "Task Queues" might be more suited to my use case than Backends. 
+* Which .. I just have a special address that processes an RSS feed? 
+* Okay, standard run-of-the mill URL -> StreamReader -> BufferedReader Java bullshit. Let's abstract this into a fetcher. 
+* Fetch.scala. Lazy little bit. 
+* Before I forget, I should remember to set the MIMEType correctly on the JSON I'm sending back to the user. This isn't plaintext, bub.
+* Okay, time to parse some RSS feeds. Are there any RSS libraries I can use?
+* Looks like ROME is deader than dead, and feed4j was written in the Old Times. Nothing for Scala. Guess I'm building it myself.
+* Writing a RSS reader that parses to spec is pretty damn easy, with Scala's built in XML tooling. Enter Syndicate.scala
+* The problem with RSS parsing is... special cases. Oh so many special cases. Let's look at some!
+ * RSS+Atom together compose about 11 competing and not entirely compatible protocols. 
+ * Some Atom feeds have multiple `<link>` elements!
+ * RSS2 uses `<link>http://...</link>` whereas Atom uses `<link href='http://...'>`, I think? 
+ * The correct date format for RSS2 is RFC 822, but Penny Arcade mistakenly uses ISO 8601 instead
+ * Travis's feed (http://travisbrown.ca/blog.rss) uses both `<description>` and `<content>` fields. 
+* The Syndicate code might just need a suite of Unit Tests to work through. It's certainly going to be complicated enough. 
+* But just being able to parse basic RSS gets us at least a little bit of the way there. LITTLE VICTORY! 
