@@ -194,3 +194,24 @@ DAY 6
    I was supposed to have been copying jars from the SDK into the WEB-INF/lib folder.  I'm surprised that this didn't come 
    as part of the prepackaged GAE+Unfiltered build. Oh well. 
 * Yeah! The rest was a piece of pie! PIE!
+
+DAY 7
+=====
+* What's next? On the wall I have Hello World (done), JSON (done), Authentication (done), Backend, RSS consume, Storage...
+* I suspect that creating a backend to consume a RSS feed is the way to go. But it's friiiidaaaaaay nyeeeeh. 
+* It looks like "Task Queues" might be more suited to my use case than Backends. 
+* Which .. I just have a special address that processes an RSS feed? 
+* Okay, standard run-of-the mill URL -> StreamReader -> BufferedReader Java bullshit. Let's abstract this into a fetcher. 
+* Fetch.scala. Lazy little bit. 
+* Before I forget, I should remember to set the MIMEType correctly on the JSON I'm sending back to the user. This isn't plaintext, bub.
+* Okay, time to parse some RSS feeds. Are there any RSS libraries I can use?
+* Looks like ROME is deader than dead, and feed4j was written in the Old Times. Nothing for Scala. Guess I'm building it myself.
+* Writing a RSS reader that parses to spec is pretty damn easy, with Scala's built in XML tooling. Enter Syndicate.scala
+* The problem with RSS parsing is... special cases. Oh so many special cases. Let's look at some!
+ * RSS+Atom together compose about 11 competing and not entirely compatible protocols. 
+ * Some Atom feeds have multiple `<link>` elements!
+ * RSS2 uses `<link>http://...</link>` whereas Atom uses `<link href='http://...'>`, I think? 
+ * The correct date format for RSS2 is RFC 822, but Penny Arcade mistakenly uses ISO 8601 instead
+ * Travis's feed (http://travisbrown.ca/blog.rss) uses both `<description>` and `<content>` fields. 
+* The Syndicate code might just need a suite of Unit Tests to work through. It's certainly going to be complicated enough. 
+* But just being able to parse basic RSS gets us at least a little bit of the way there. LITTLE VICTORY! 

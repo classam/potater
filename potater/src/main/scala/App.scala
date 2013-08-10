@@ -38,5 +38,11 @@ class App extends unfiltered.filter.Plan {
     case GET(Path(Seg("users" :: username :: tail))) => {
       Unauthorized ~> ResponseString( "You are not that person!" )
     }
+    case GET(Path(Seg("process" :: tail))) => {
+      val url = tail.mkString("/")
+      val xml = new Fetch(url).asXML
+      val syn = Syndicate.parse(xml)
+      ResponseString( syn.toString )
+    }
   }
 }
