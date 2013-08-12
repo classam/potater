@@ -219,3 +219,12 @@ DAY 7
  * Travis's feed (http://travisbrown.ca/blog.rss) uses both `<description>` and `<content>` fields. 
 * The Syndicate code might just need a suite of Unit Tests to work through. It's certainly going to be complicated enough. 
 * But just being able to parse basic RSS gets us at least a little bit of the way there. LITTLE VICTORY! 
+
+DAY 8
+=====
+* Okay, trying to run this on my laptop again. Everything goes smoothly except... 
+* It's listening on 127.0.0.1, when it needs to be listening on 0.0.0.0
+* Shit, how do I change that setting? It's gotta be somewhere in the sbt config, right? 
+* [This might help.](https://github.com/sbt/sbt-appengine/blob/master/src/main/scala/AppenginePlugin.scala)
+* Oh, so I can just pass the settings right to sbt. Nice.
+* `appengine-dev-server --address=0.0.0.0`
