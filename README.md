@@ -21,7 +21,6 @@ DAY 0
  * ArticleStatus (FK ArticleStub, FK User)
 
 DAY 1
-DAY 1
 =====
 * Flipped through the Scala chapter of Seven Languages in Seven Weeks at high speed. I'll learn as I go. 
 * [Installation](http://www.scalatra.org/getting-started/installation.html)
@@ -97,8 +96,13 @@ DAY 1
 * .. apparently there is. I wonder if it did anything?
 * well, if compiled files went anywhere in this heirarchy, I bet they'd be in 'target'.  It's empty? Okay, good.
 
-
-
+Day 2
+=====
+* Picked up Kristen from Canada Place.  This gave me time to go through the first 300 pages of Odersky's Scala book. 
+* Okay, setting this up on a Windows computer... in Vagrant, so I don't have to deal with Windows poop.
+* In order to make this work in Vagrant I needed to run `sudo apt-get install python-software-properties`
+* And curl. Wow Vagrant is lightweight. 
+* sbt isn't working. maybe if I recreate a skeleton project and run sbt from there? 
 
 DAY 3
 =====
@@ -215,3 +219,12 @@ DAY 7
  * Travis's feed (http://travisbrown.ca/blog.rss) uses both `<description>` and `<content>` fields. 
 * The Syndicate code might just need a suite of Unit Tests to work through. It's certainly going to be complicated enough. 
 * But just being able to parse basic RSS gets us at least a little bit of the way there. LITTLE VICTORY! 
+
+DAY 8
+=====
+* Okay, trying to run this on my laptop again. Everything goes smoothly except... 
+* It's listening on 127.0.0.1, when it needs to be listening on 0.0.0.0
+* Shit, how do I change that setting? It's gotta be somewhere in the sbt config, right? 
+* [This might help.](https://github.com/sbt/sbt-appengine/blob/master/src/main/scala/AppenginePlugin.scala)
+* Oh, so I can just pass the settings right to sbt. Nice.
+* `appengine-dev-server --address=0.0.0.0`
