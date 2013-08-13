@@ -206,7 +206,7 @@ DAY 7
 * Before I forget, I should remember to set the MIMEType correctly on the JSON I'm sending back to the user. This isn't plaintext, bub.
 * Okay, time to parse some RSS feeds. Are there any RSS libraries I can use?
 * Looks like ROME is deader than dead, and feed4j was written in the Old Times. Nothing for Scala. Guess I'm building it myself.
-* Writing a RSS reader that parses to spec is pretty damn easy, with Scala's built in XML tooling. Enter Syndicate.scala
+* Writing a RSS reader that parses to spec is pretty damn easy, with Scala's built in XML tooling. 
 * The problem with RSS parsing is... special cases. Oh so many special cases. Let's look at some!
  * RSS+Atom together compose about 11 competing and not entirely compatible protocols. 
  * Some Atom feeds have multiple `<link>` elements!
