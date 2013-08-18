@@ -12,14 +12,9 @@ trait Syndicate{
   def language:String
   def updated:String
   def items:Seq[SyndicateItem]
-  def updatedDateTime:DateTime = {
-    if( updated != "" ){
-      return Syndicate.fmt.parseDateTime(updated);
-    }
-    else {
-      val datetimes = items.map( _.updatedDateTime );
-      return datetimes.reduceLeft( (x:DateTime, y:DateTime) => { if( x.compareTo(y) > 0 ) { return x; } else { return y; } } );
-    }
+  def updatedDateTime:Option[DateTime] = updated match{
+    case "" => items.map(_.updatedDateTime).reduceLeft(Syndicate.laterOfTwoDateTimes);
+    case _ => Syndicate.parseDate(updated);
   }
   override def toString:String = {
     ("Title: " + title + "\n" + 
@@ -39,9 +34,7 @@ trait SyndicateItem{
   def content:String
   def guid:String
   def updated:String
-  def updatedDateTime:DateTime = {
-    return Syndicate.fmt.parseDateTime(updated);
-  }
+  def updatedDateTime:Option[DateTime] = Syndicate.parseDate(updated)
   override def toString:String = {
     ("Title: " + title + "\n" + 
     "Link: " + link + "\n" + 
@@ -66,15 +59,48 @@ object Syndicate{
         case _ => node;
       }
     }
-    content.last.child.map(stripNamespaces).map(x => x.toString).mkString(" ")
+    if(content.length >= 1){
+      val children = content.last.child;
+      if(children.filter( _.toString.trim != "" ).length > 1 ){
+        return children.map(stripNamespaces).map(x => x.toString).mkString(" ").trim;
+      }
+      else{
+        return content.last.text.trim
+      }
+    }
+    else{
+      return "";
+    }
   }
-  val parsers:Array[DateTimeParser] = Array(
+  private val parsers:Array[DateTimeParser] = Array(
     ISODateTimeFormat.dateTimeParser().getParser(),
     DateTimeFormat.forPattern("E, d MMM y HH:mm:ss Z").getParser(),
     DateTimeFormat.forPattern("E, d MMM y HH:mm:ss Z '('z')'").getParser(),
     DateTimeFormat.forPattern("E, d MMM y HH:mm:ss z").getParser(),
     DateTimeFormat.forPattern("dd MMM y HH:mm:ss Z").getParser() );
-  val fmt:DateTimeFormatter = new DateTimeFormatterBuilder().append(null, parsers).toFormatter();
+  private val fmt:DateTimeFormatter = new DateTimeFormatterBuilder().append(null, parsers).toFormatter();
+  def parseDate(s:String):Option[DateTime] = {
+    try {
+      Option.apply(fmt.parseDateTime(s));
+    }
+    catch{
+      case _ => None
+    }
+  }
+  def laterOfTwoDateTimes(x:Option[DateTime], y:Option[DateTime]):Option[DateTime] = {
+    if( x.isDefined && !y.isDefined ){
+      return x;
+    }
+    else if( y.isDefined && !x.isDefined ){
+      return y;
+    }
+    else if( x.isDefined && y.isDefined ){
+      if( x.get.compareTo(y.get) > 0 ) { return x; } else { return y; } 
+    }
+    else{
+      return None;
+    }
+  }
 }
 
 class RSS2Item( var item:Node ) extends SyndicateItem{
@@ -94,9 +120,23 @@ class RSS2(var rss:Elem) extends Syndicate{
   val copyright = (rss \ "channel" \ "copyright").text
   val description = (rss \ "channel" \ "description").text
   val language = (rss \ "channel" \ "language").text
-  val pubDate = (rss \ "channel" \ "pubDate" ).text
-  val lastBuildDate = (rss \ "channel" \ "lastBuildDate" ).text
-  val updated = lastBuildDate /* actually I think we should take the later of pubDate/lastBuildDate */
+  
+  val pubdate = (rss \ "channel" \ "pubDate" ).text
+  val lastbuilddate = (rss \ "channel" \ "lastBuildDate" ).text
+  
+  def pubdate_or_builddate:String = {
+    val pubdateDateTime = Syndicate.parseDate( pubdate );
+    val lastbuilddateDateTime = Syndicate.parseDate( lastbuilddate );
+    val updatedDt = Syndicate.laterOfTwoDateTimes( pubdateDateTime, lastbuilddateDateTime )
+    if (updatedDt equals pubdateDateTime){
+      return pubdate;
+    }
+    else{
+      return lastbuilddate;
+    }
+  }
+
+  val updated = pubdate_or_builddate
   val items:Seq[SyndicateItem] = (rss \ "channel" \ "item").map( x => new RSS2Item( x )) 
 }
   
@@ -113,7 +153,7 @@ class Atom1Item( var item:Node ) extends SyndicateItem{
 class Atom1(var rss:Elem) extends Syndicate{
   val version = (rss \ "@version").text
   val title = (rss \ "title" ).text
-  val description = (rss \ "subtitle").text
+  val description = Syndicate.html(rss \ "subtitle")
   val links = (rss \ "link")
   val link = Atom1.pick_correct_link(links)
   val copyright = (rss \ "rights").text
