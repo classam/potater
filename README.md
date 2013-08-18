@@ -228,3 +228,25 @@ DAY 8
 * [This might help.](https://github.com/sbt/sbt-appengine/blob/master/src/main/scala/AppenginePlugin.scala)
 * Oh, so I can just pass the settings right to sbt. Nice.
 * `appengine-dev-server --address=0.0.0.0`
+
+DAY 9
+=====
+* Okay, in order to get the RSS reader working the way I want it to, I'm going to engage Many Unit Tests. 
+* We'll keep a file full of RSS Examples, and then check to make sure that the examples all parse properly.
+* Using scalatest rather than this Specification thing. BDD bleugh. 
+* WHY WON'T IT FIND THE TESTS? RAARGH.
+* Oh, I'm trying to run sbt from `potater` rather than `potater/potater`. I _knew_ that would be confusing. 
+* Tests running. Let's write some! 
+* Let's get vim-scala style running properly on my laptop. 
+* Okay, neocomplcache is awful. Do not want. 
+* Joda Time! First instinct was to install the `nscala_time` helper library, but an undocumented wrapper
+    around Joda is worse than just using (well-documented) Joda. 
+* We need to format pretty arbitrary dates. The way to do this in Joda is to
+    construct a Formatter chain containing all possible formats and take a 
+    crack at it. 
+* Seems to.. work? 
+* Okay, I'm not getting link elements properly. Atom feeds can have multiple link
+    elements, each with a href, and I want the one that doesn't have a 'rel', I think.
+* How do I select only elements that don't have a "rel" defined? 
+* Okay, I think I've got it. 
+* Woohoo, I've got all of my unit tests passing. Let's write more! 
