@@ -16,6 +16,12 @@ trait PotaterUser {
 
 object PotaterUser {
   def getUser( username:String ):PotaterUser = {
-    return new MockUser( username )
+    val mock = true;
+    if( mock ){
+      return new MockUser( username );
+    }
+    else{
+      return new GoogleUser( username );
+    }
   }
 }
