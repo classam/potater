@@ -104,25 +104,25 @@ object Syndicate{
 }
 
 class RSS2Item( var item:Node ) extends SyndicateItem{
-  val title = (item \ "title").text
+  val title = (item \ "title").text.trim
   val description = Syndicate.html(item \ "description")
   val summary = description /* make into an excerpt */
   val content = description
-  val link = (item \ "link").text
-  val guid = (item \ "guid").text
-  val updated = (item \ "pubDate").text
+  val link = (item \ "link").text.trim
+  val guid = (item \ "guid").text.trim
+  val updated = (item \ "pubDate").text.trim
 }
 
 class RSS2(var rss:Elem) extends Syndicate{
-  val version = (rss \ "@version").text
-  val title = (rss \ "channel" \ "title" ).text
-  val link = (rss \ "channel" \ "link").text
-  val copyright = (rss \ "channel" \ "copyright").text
-  val description = (rss \ "channel" \ "description").text
-  val language = (rss \ "channel" \ "language").text
+  val version = (rss \ "@version").text.trim
+  val title = (rss \ "channel" \ "title" ).text.trim
+  val link = (rss \ "channel" \ "link").text.trim
+  val copyright = (rss \ "channel" \ "copyright").text.trim
+  val description = (rss \ "channel" \ "description").text.trim
+  val language = (rss \ "channel" \ "language").text.trim
   
-  val pubdate = (rss \ "channel" \ "pubDate" ).text
-  val lastbuilddate = (rss \ "channel" \ "lastBuildDate" ).text
+  val pubdate = (rss \ "channel" \ "pubDate" ).text.trim
+  val lastbuilddate = (rss \ "channel" \ "lastBuildDate" ).text.trim
   
   def pubdate_or_builddate:String = {
     val pubdateDateTime = Syndicate.parseDate( pubdate );
@@ -141,24 +141,24 @@ class RSS2(var rss:Elem) extends Syndicate{
 }
   
 class Atom1Item( var item:Node ) extends SyndicateItem{
-  val title = (item \ "title").text
-  val summary = (item \ "summary").text
-  val content = (item \ "content").text
+  val title = (item \ "title").text.trim
+  val summary = (item \ "summary").text.trim
+  val content = Syndicate.html(item \ "content")
   val links = (item \ "link")
-  val link = Atom1.pick_correct_link(links)
-  val guid = (item \ "id").text
-  val updated = (item \ "updated").text
+  val link = Atom1.pick_correct_link(links).trim
+  val guid = (item \ "id").text.trim
+  val updated = (item \ "updated").text.trim
 }
 
 class Atom1(var rss:Elem) extends Syndicate{
-  val version = (rss \ "@version").text
-  val title = (rss \ "title" ).text
+  val version = (rss \ "@version").text.trim
+  val title = (rss \ "title" ).text.trim
   val description = Syndicate.html(rss \ "subtitle")
   val links = (rss \ "link")
-  val link = Atom1.pick_correct_link(links)
-  val copyright = (rss \ "rights").text
-  val language = (rss \ "language").text
-  val updated = (rss \ "updated" ).text
+  val link = Atom1.pick_correct_link(links).trim
+  val copyright = (rss \ "rights").text.trim
+  val language = (rss \ "language").text.trim
+  val updated = (rss \ "updated" ).text.trim
   val items:Seq[SyndicateItem] = (rss \ "entry").map( x => new Atom1Item( x )) 
 }
 

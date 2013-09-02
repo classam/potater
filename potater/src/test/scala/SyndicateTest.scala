@@ -160,4 +160,14 @@ class SyndicateSuite extends FunSuite {
     assert(dt.year().get() === 2013)
   }
 
+  test("Penny Arcade - Wrong Date Format"){
+    val dt = Syndicate.parse(Corpus.penny_arcade).updatedDateTime.get;
+    assert(dt.dayOfMonth().get() === 16)
+    assert(dt.monthOfYear().getAsShortText() === "Aug")
+    assert(dt.year().get() === 2013)
+  }
+  test("Penny Arcade - Item 1 - Title"){
+    assert( Syndicate.parse(Corpus.penny_arcade).items(0).title === "News Post: Innovationes" ); 
+  }
+
 }
