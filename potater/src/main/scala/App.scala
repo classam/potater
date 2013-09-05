@@ -21,8 +21,7 @@ class App extends unfiltered.filter.Plan {
     }
     case GET(Path(Seg("users" :: username :: Nil) ) ) if Auth.check(username) => {
       val user = PotaterUser.getUser(username)
-      val list = user.settingsJson
-      ResponseString( pretty(render(list)) )
+      ResponseString( user.key )
     }
     case GET(Path(Seg("users" :: username :: "subscriptions" :: Nil))) if Auth.check(username) => {
       val user = PotaterUser.getUser(username)

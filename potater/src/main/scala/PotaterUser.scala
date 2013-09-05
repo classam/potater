@@ -9,6 +9,7 @@ trait PotaterUser {
   def subscriptions : List[Feed]
   def articles : List[ArticleStub]
   def settings : List[UserSetting]
+  def key : String 
   def articlesJson : List[JValue] = { articles.map( _.jsonObject) }
   def subscriptionsJson : List[JValue] = { subscriptions.map( _.jsonObject) }
   def settingsJson : List[JValue] = { settings.map( _.jsonObject) }
@@ -16,12 +17,6 @@ trait PotaterUser {
 
 object PotaterUser {
   def getUser( username:String ):PotaterUser = {
-    val mock = true;
-    if( mock ){
-      return new MockUser( username );
-    }
-    else{
-      return new GoogleUser( username );
-    }
+    return new GoogleUser( username );
   }
 }
