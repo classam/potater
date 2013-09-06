@@ -26,7 +26,12 @@ class App extends unfiltered.filter.Plan {
     case GET(Path(Seg("users" :: username :: Nil) ) ) if Auth.check(username) => {
       var datastore:DatastoreService = DatastoreServiceFactory.getDatastoreService();
       val user = User.get(username, datastore)
-      ResponseString( user.entity.getKey.toString )
+      if( user.isDefined ){
+        ResponseString( user.get.entity.getKey.toString )
+      }
+      else{
+        ResponseString( "User "+username+" doesn't exist" )
+      }
     }
     case GET(Path(Seg("users" :: username :: "subscriptions" :: Nil))) if Auth.check(username) => {
       //val user = PotaterUser.getUser(username)
@@ -46,18 +51,16 @@ class App extends unfiltered.filter.Plan {
     case GET(Path(Seg("feeds" :: tail))) => {
       var datastore:DatastoreService = DatastoreServiceFactory.getDatastoreService();
       val url = tail.mkString("/")
-      val feed = Feed.get(url, datastore)
+      val feed = Feed.get(url, datastore).get
       JSON ~> ResponseString( feed.json )
     }
     case GET(Path(Seg("process" :: tail))) => {
       var datastore:DatastoreService = DatastoreServiceFactory.getDatastoreService();
       val url = tail.mkString("/")
-      var feed = Feed.get(url, datastore)
+      var feed = Feed.get(url, datastore).get
       try{
         val xml = new Fetch(url).asXML
         val syn = Syndicate.parse(xml)
-        // TODO: If feed has actually been updated, call feed.updated
-        // else call feed.checked
         feed = feed.updated(syn)
       }
       catch{

@@ -53,19 +53,22 @@ class User( val username:String, entity_constructor:Option[Entity] ) extends Has
 }
 
 object User {
-  def get( username:String, datastore:DatastoreService ):User = {
+  def get( username:String, datastore:DatastoreService ):Option[User] = {
+    return User.get(KeyFactory.createKey("User", username), datastore)
+  }
+  def get( key:Key, datastore:DatastoreService ):Option[User] = {
     try{
-      return new User(username, datastore.get(KeyFactory.createKey("User", username)))
+      return Option.apply(new User( datastore.get(key)));
     }
     catch{
       case e:EntityNotFoundException => {
-        var user = new User(username)
-        datastore.put(user.entity)
-        return user;
+        return None;
       }
     }
   }
-  def get( userkey:Key, datastore:DatastoreService ):User = {
-    return new User( datastore.get(userkey) );
+  def create( username:String, datastore:DatastoreService ):User = {
+    var user = new User(username)
+    datastore.put(user.entity)
+    return user;
   }
 }

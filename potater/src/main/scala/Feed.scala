@@ -93,22 +93,23 @@ class Feed( val url: String,                    // http://curtis.lassam.net/feed
 }
 
 object Feed {
-  def get(url:String, datastore:DatastoreService):Feed = {
-    // If the feed exists, fetch it.
-    // if it does not, do not. 
+  def get(url:String, datastore:DatastoreService):Option[Feed] = {
+    return Feed.get(KeyFactory.createKey("Feed", url), datastore)
+  }
+  def get( key:Key, datastore:DatastoreService ):Option[Feed] = {
     try{
-      return new Feed(datastore.get(KeyFactory.createKey("Feed", url)))
+      return Option.apply(new Feed( datastore.get(key) ));
     }
     catch{
       case e:EntityNotFoundException =>{
-        var feed = new Feed(url)
-        datastore.put(feed.entity)
-        return feed
+        return None
       }
     }
   }
-  def get( feedkey:Key, datastore:DatastoreService ):Feed = {
-    return new Feed( datastore.get(feedkey) );
+  def create(url:String, datastore:DatastoreService):Feed = {
+    var feed = new Feed(url)
+    datastore.put(feed.entity)
+    return feed
   }
 
 }
