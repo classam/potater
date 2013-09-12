@@ -2,7 +2,8 @@ package net.lassam
 
 import net.lassam._
 
-import com.google.appengine.api.datastore.{Entity, Text, DatastoreService, KeyFactory, Key, EntityNotFoundException}
+import scala.collection.JavaConverters._
+import com.google.appengine.api.datastore._
 import com.google.appengine.api.datastore.Query
 import com.google.appengine.api.datastore.Query._
 import java.util.{Date => OldDate}
@@ -10,7 +11,7 @@ import org.joda.time._
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 
-class Article( val feed:Feed,
+class Article( val feedKey:Key,
                val title:String, 
                val url:String,
                val summary:String,
@@ -20,15 +21,15 @@ class Article( val feed:Feed,
                entity_constructor: Option[Entity] ) extends HasJsonObject {
   private var priv_entity:Option[Entity] = entity_constructor
 
-  def this(feed:Feed, title:String, url:String, summary:String, content:String, guid:String, updated:DateTime){
-    this(feed, title, url, summary, content, guid, updated, None)
+  def this(feedKey:Key, title:String, url:String, summary:String, content:String, guid:String, updated:DateTime){
+    this(feedKey, title, url, summary, content, guid, updated, None)
   }
 
-  def this(feed:Feed, item:SyndicateItem){
-    this(feed, item.title, item.link, item.summary, item.content, item.guid, Article.defaultDateTime(item.updatedDateTime), None)
+  def this(feedKey:Key, item:SyndicateItem){
+    this(feedKey, item.title, item.link, item.summary, item.content, item.guid, Article.defaultDateTime(item.updatedDateTime), None)
   }
-  def this(feed:Feed, entity_constructor:Entity){
-    this( feed, 
+  def this(feedKey:Key, entity_constructor:Entity){
+    this( feedKey, 
           entity_constructor.getProperty("title").asInstanceOf[String],
           entity_constructor.getProperty("url").asInstanceOf[String],
           entity_constructor.getProperty("summary").asInstanceOf[Text].getValue, 
@@ -40,12 +41,12 @@ class Article( val feed:Feed,
   
   def jsonObject = { ("title"->title) ~ ("url"->url) ~ ("summary"->summary) ~
                      ("content"->content) ~ ("guid"->guid) ~ ("updated"->updated.toString()) ~
-                     ("feed"->feed.jsonObject) }
+                     ("feedKey"->feedKey.toString()) }
   
   def entity:Entity = priv_entity.isDefined match {
     case true => { priv_entity.get }
     case false => { 
-      var ent:Entity = new Entity("Article", Article.generateKey(feed, guid), feed.entity.getKey)
+      var ent:Entity = new Entity("Article", Article.generateKey(feedKey, guid), feedKey)
       ent.setProperty("guid", guid )
       ent.setProperty("updated", updated.toDate )
       ent.setUnindexedProperty("title", title)
@@ -59,16 +60,24 @@ class Article( val feed:Feed,
 }
 
 object Article {
-  def generateKey( feed:Feed, guid:String ):String = {
-    return feed.url + "%%" + guid
+  def generateKey( feedKey:Key, guid:String ):String = {
+    return feedKey.toString() + "%%" + guid
   }
   def defaultDateTime(datetime:Option[DateTime]):DateTime = datetime.isDefined match {
     case true => { datetime.get }
     case false => { new DateTime() }
   }
-  def create(feed:Feed, item:SyndicateItem, datastore:DatastoreService):Article = {
-    val article = new Article(feed, item) 
+  def create(feedKey:Key, item:SyndicateItem, datastore:DatastoreService):Article = {
+    val article = new Article(feedKey, item) 
     datastore.put(article.entity)
     return article
+  }
+  def getArticlesForFeed(feed:Feed, n_results:Integer, datastore:DatastoreService):Iterable[Article] = {
+    return getArticlesForFeed(feed.entity.getKey, n_results, datastore)
+  }
+  def getArticlesForFeed(feedKey:Key, n_results:Integer, datastore:DatastoreService):Iterable[Article] = {
+    val query:Query = new Query("Article").setAncestor(feedKey).addSort("updated", SortDirection.ASCENDING)
+    val result:PreparedQuery = datastore.prepare(query)
+    return result.asIterable(FetchOptions.Builder.withLimit(n_results)).asScala.map( (entity:Entity) => new Article(feedKey, entity) )
   }
 }

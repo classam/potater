@@ -13,30 +13,24 @@ import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 
 // a Subcription maps a User to a Feed // 
-class Subscription( val userKey:Key, val feedKey:Key, val category:String, entity_constructor: Option[Entity] ) extends HasJsonObject{
+class Subscription( val userKey:Key, val feedKey:Key, val isNew:Boolean, val unread:Integer, val category:String, entity_constructor: Option[Entity] ) extends HasJsonObject{
   private var priv_entity:Option[Entity] = entity_constructor
 
   def this( user:User, feed:Feed ){
-    this( user.entity.getKey(), feed.entity.getKey(), "Default", None )
+    this( user.entity.getKey(), feed.entity.getKey(), true, 0, "Default", None )
   }
 
   def this( user:User, feed:Feed, category:String ){
-    this( user.entity.getKey(), feed.entity.getKey(), category, None )
+    this( user.entity.getKey(), feed.entity.getKey(), true, 0, category, None )
   }
 
   def this( entity_constructor:Entity ){
     this( entity_constructor.getProperty("user_key").asInstanceOf[Key],
           entity_constructor.getProperty("feed_key").asInstanceOf[Key], 
+          entity_constructor.getProperty("new").asInstanceOf[Boolean],
+          entity_constructor.getProperty("unread").asInstanceOf[Integer],
           entity_constructor.getProperty("category").asInstanceOf[String],
           Option.apply(entity_constructor) )
-  }
-
-  def user(datastore:DatastoreService):User = {
-    User.get(userKey, datastore).get;
-  }
-
-  def feed(datastore:DatastoreService):Feed = {
-    Feed.get(feedKey, datastore).get;
   }
 
   def jsonObject = { ("category"->category) ~ ("feed"->feedKey.toString) }
@@ -46,13 +40,20 @@ class Subscription( val userKey:Key, val feedKey:Key, val category:String, entit
     return new Subscription( entity )
   }
 
+  def changeUnread( unread:Integer):Subscription = {
+    entity.setUnindexedProperty("unread", unread)
+    return new Subscription( entity )
+  }
+
   def entity:Entity = priv_entity.isDefined match {
     case true => { priv_entity.get }
     case false => { 
       var ent:Entity = new Entity("Subscription", Subscription.generateKey(userKey, feedKey), userKey )
-      ent.setProperty("user_key", userKey )
       ent.setProperty("feed_key", feedKey )
-      ent.setUnindexedProperty("category", category )
+      ent.setProperty("category", category )
+      ent.setUnindexedProperty("user_key", userKey )
+      ent.setUnindexedProperty("new", isNew )
+      ent.setUnindexedProperty("unread", unread )
       priv_entity = Option.apply(ent)
       return priv_entity.get;
     }
@@ -88,9 +89,12 @@ object Subscription {
     datastore.put(subscription.entity)
     return subscription;
   }
-  def findUsersSubscribedTo(feed:Feed, datastore:DatastoreService):Iterable[User] = {
-    val query:Query = new Query("Subscription").addFilter( "feed_key", FilterOperator.EQUAL, feed.entity.getKey() )
+  def getSubscribedTo(feed:Feed, datastore:DatastoreService):Iterable[Subscription] = {
+    return getSubscribedTo(feed.entity.getKey(), datastore);
+  }
+  def getSubscribedTo(feedKey:Key, datastore:DatastoreService):Iterable[Subscription] = {
+    val query:Query = new Query("Subscription").addFilter( "feed_key", FilterOperator.EQUAL, feedKey )
     val result:PreparedQuery = datastore.prepare(query)
-    return result.asIterable.asScala.map( (entity:Entity) => new User(entity) )
+    return result.asIterable.asScala.map( (entity:Entity) => new Subscription(entity))
   }
 }
