@@ -52,7 +52,8 @@ class App extends unfiltered.filter.Plan {
     }
     // GET /users/classam/subscriptions/http://curtis.lassam.net/feed.xml : show this subscription 
     case GET(Path(Seg("users" :: username :: "subscriptions" :: tail))) if Auth.check(username) => {
-      var subscription = Feed.get(username, url)
+      val url = tail.mkString("/")
+      var subscription = Subscription.get(username, url, datastore)
       if(!subscription.isDefined) {
         NotFound ~> ResponseString( "That subscription doesn't exist." )
       }
@@ -62,16 +63,16 @@ class App extends unfiltered.filter.Plan {
     //    this will also queue up this subscription's Feed for processing. 
     case POST(Path(Seg("users" :: username :: "subscriptions" :: tail))) if Auth.check(username) => {
       val url = tail.mkString("/")
-      var subscription = Subscription.get(username, url)
+      var subscription = Subscription.get(username, url, datastore)
       if( !subscription.isDefined ){ 
         
         // Check if the Feed exists.
-        var feed = Feed.get(url)
+        var feed = Feed.get(url, datastore)
         if(!feed.isDefined) {
-          feed = Option.apply( Feed.create(url) )
+          feed = Option.apply( Feed.create(url, datastore) )
         }
 
-        subscription = Option.apply( Subscription.create( username, url )) 
+        subscription = Option.apply( Subscription.create( username, url, datastore )) 
 
         // Now add the subscription to the processing queue. 
         val queue:Queue = QueueFactory.getDefaultQueue();
@@ -87,7 +88,7 @@ class App extends unfiltered.filter.Plan {
     // GET /users/classam/articles/http://curtis.lassam.net/feed.xml : show top unread ArticleStubs for classam in this feed.
     case GET(Path(Seg("users" :: username :: "articles" :: tail))) if Auth.check(username) => {
       val url = tail.mkString("/")
-      val json = HasJsonObject.listJson( ArticleStub.getArticleStubsForSubscription( Subscription.generateKey(username, url), datastore ))
+      val json = HasJsonObject.listJson( ArticleStub.getArticleStubsForSubscription( Subscription.generateKey(username, url), 1000, datastore ))
       JSON ~> ResponseString( json )
     }
     // TODO: GET /users/classam/articles/1238382932/http://curtis.lassam.net/feed.xml : show article details  
@@ -99,8 +100,9 @@ class App extends unfiltered.filter.Plan {
       Unauthorized ~> ResponseString( "You are not that person!" )
     }
     // GET /articles/2983883293/http://curtis.lassam.net/feed.xml : show the actual article for feed at GUID.
-    case GET(Path(Set("articles" :: guid :: feed :: Nil))) => {
-      val article = Article.get( feed, guid, datastore )
+    case GET(Path(Seg("articles" :: guid :: tail))) => {
+      val url = tail.mkString("/")
+      val article = Article.get( url, guid, datastore )
       if (!article.isDefined){
         NotFound ~> ResponseString( "That article doesn't exist." )
       }

@@ -28,8 +28,8 @@ class Article( val feedKey:Key,
   def this(feedKey:Key, item:SyndicateItem){
     this(feedKey, item.title, item.link, item.summary, item.content, item.guid, Article.defaultDateTime(item.updatedDateTime), None)
   }
-  def this(feedKey:Key, entity_constructor:Entity){
-    this( feedKey, 
+  def this(entity_constructor:Entity){
+    this( entity_constructor.getProperty("feedKey").asInstanceOf[Key], 
           entity_constructor.getProperty("title").asInstanceOf[String],
           entity_constructor.getProperty("url").asInstanceOf[String],
           entity_constructor.getProperty("summary").asInstanceOf[Text].getValue, 
@@ -46,12 +46,14 @@ class Article( val feedKey:Key,
   def entity:Entity = priv_entity.isDefined match {
     case true => { priv_entity.get }
     case false => { 
+      var ent:Entity = new Entity("Article", feedKey.toString() + "%%" + guid, feedKey) 
       ent.setProperty("guid", guid )
       ent.setProperty("updated", updated.toDate )
       ent.setUnindexedProperty("title", title)
       ent.setUnindexedProperty("url", url)
       ent.setUnindexedProperty("summary", new Text(summary))
       ent.setUnindexedProperty("content", new Text(content))
+      ent.setUnindexedProperty("feedKey", feedKey)
       priv_entity = Option.apply(ent)
       return priv_entity.get;
     }
@@ -66,12 +68,12 @@ object Article {
     case true => { datetime.get }
     case false => { new DateTime() }
   }
-  def get( feedKey:Key, guid:String):Option[Article] = {
-    get( generateKey( feedKey, guid )) 
+  def get( url:String, guid:String, datastore:DatastoreService):Option[Article] = {
+    get( generateKey( Feed.generateKey(url), guid ), datastore) 
   }
-  def get( articleKey:Key ):Option[Article] = {
+  def get( articleKey:Key, datastore:DatastoreService ):Option[Article] = {
     try{
-      return Option.apply(new Article( datastore.get(key) ));
+      return Option.apply(new Article( datastore.get(articleKey) ));
     }
     catch{
       case e:EntityNotFoundException =>{
@@ -90,6 +92,6 @@ object Article {
   def getArticlesForFeed(feedKey:Key, n_results:Integer, datastore:DatastoreService):Iterable[Article] = {
     val query:Query = new Query("Article").setAncestor(feedKey).addSort("updated", SortDirection.ASCENDING)
     val result:PreparedQuery = datastore.prepare(query)
-    return result.asIterable(FetchOptions.Builder.withLimit(n_results)).asScala.map( (entity:Entity) => new Article(feedKey, entity) )
+    return result.asIterable(FetchOptions.Builder.withLimit(n_results)).asScala.map( (entity:Entity) => new Article(entity) )
   }
 }

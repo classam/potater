@@ -46,7 +46,7 @@ class ArticleStub( val subscriptionKey:Key,
   def entity:Entity = priv_entity.isDefined match {
     case true => { priv_entity.get }
     case false => { 
-      var ent:Entity = new Entity("ArticleStub", ArticleStub.generateKey(subscriptionKey, guid), subscriptionKey)
+      var ent:Entity = new Entity("ArticleStub", guid + "%%" + subscriptionKey.toString, subscriptionKey)
       ent.setProperty("updated", updated.toDate )
       ent.setProperty("read", read )
       ent.setUnindexedProperty("guid", guid )

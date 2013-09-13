@@ -47,7 +47,7 @@ class Subscription( val userKey:Key, val feedKey:Key, val isNew:Boolean, val unr
   def entity:Entity = priv_entity.isDefined match {
     case true => { priv_entity.get }
     case false => { 
-      var ent:Entity = new Entity("Subscription", Subscription.generateKey(userKey, feedKey), userKey )
+      var ent:Entity = new Entity("Subscription", userKey.toString()+"%%"+feedKey.toString(), userKey )
       ent.setProperty("feed_key", feedKey )
       ent.setProperty("category", category )
       ent.setUnindexedProperty("user_key", userKey )
@@ -67,10 +67,10 @@ object Subscription {
     KeyFactory.createKey("Subscription", user_key.toString+"%%"+feed_key.toString)
   }
   def get(username:String, url:String, datastore:DatastoreService):Option[Subscription] = { 
-    get( generateKey(username, url))
+    get( generateKey(username, url), datastore)
   }
   def get(user:User, feed:Feed, datastore:DatastoreService):Option[Subscription] = {
-    get( generateKey(user.entity.getKey, feed.entity.getKey))
+    get( generateKey(user.entity.getKey, feed.entity.getKey), datastore)
   }
   def get(subscriptionKey:Key, datastore:DatastoreService):Option[Subscription] = {
     try{
