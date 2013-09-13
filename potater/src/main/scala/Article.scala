@@ -46,7 +46,6 @@ class Article( val feedKey:Key,
   def entity:Entity = priv_entity.isDefined match {
     case true => { priv_entity.get }
     case false => { 
-      var ent:Entity = new Entity("Article", Article.generateKey(feedKey, guid), feedKey)
       ent.setProperty("guid", guid )
       ent.setProperty("updated", updated.toDate )
       ent.setUnindexedProperty("title", title)
@@ -60,12 +59,25 @@ class Article( val feedKey:Key,
 }
 
 object Article {
-  def generateKey( feedKey:Key, guid:String ):String = {
-    return feedKey.toString() + "%%" + guid
+  def generateKey( feedKey:Key, guid:String ):Key = {
+    KeyFactory.createKey("Article", feedKey.toString() + "%%" + guid)
   }
   def defaultDateTime(datetime:Option[DateTime]):DateTime = datetime.isDefined match {
     case true => { datetime.get }
     case false => { new DateTime() }
+  }
+  def get( feedKey:Key, guid:String):Option[Article] = {
+    get( generateKey( feedKey, guid )) 
+  }
+  def get( articleKey:Key ):Option[Article] = {
+    try{
+      return Option.apply(new Article( datastore.get(key) ));
+    }
+    catch{
+      case e:EntityNotFoundException =>{
+        return None
+      }
+    }
   }
   def create(feedKey:Key, item:SyndicateItem, datastore:DatastoreService):Article = {
     val article = new Article(feedKey, item) 

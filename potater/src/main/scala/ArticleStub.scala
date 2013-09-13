@@ -62,8 +62,8 @@ class ArticleStub( val subscriptionKey:Key,
 }
 
 object ArticleStub{
-  def generateKey( subscriptionKey:Key, guid:String ):String = { 
-    guid + "%%" + subscriptionKey.toString
+  def generateKey( subscriptionKey:Key, guid:String ):Key = { 
+    KeyFactory.createKey("ArticleStub", guid + "%%" + subscriptionKey.toString)
   }
   def create(article:Article, subscription:Subscription, datastore:DatastoreService):ArticleStub = {
     val articleStub = new ArticleStub(article, subscription)
@@ -74,15 +74,15 @@ object ArticleStub{
     return getArticleStubsForUser(user.entity.getKey, n_results, datastore)
   }
   def getArticleStubsForUser(username:String, n_results:Integer, datastore:DatastoreService):Iterable[ArticleStub] = {
-    return getArticleStubsForUser(KeyFactory.createKey("User", username ), n_results, datastore) 
+    return getArticleStubsForUser(User.generateKey(username), n_results, datastore) 
   }
   def getArticleStubsForUser(userKey:Key, n_results:Integer, datastore:DatastoreService):Iterable[ArticleStub] = {
     val query:Query = new Query("ArticleStub").setAncestor(userKey).addSort("updated", SortDirection.ASCENDING).addFilter("read", Query.FilterOperator.EQUAL, false)
     val result:PreparedQuery = datastore.prepare(query)
     return result.asIterable(FetchOptions.Builder.withLimit(n_results)).asScala.map( (entity:Entity) => new ArticleStub(entity) )
   }
-  def getArticleStubsForSubscription(subscription:Subscription, n_results:Integer, datastore:DatastoreService):Iterable[ArticleStub] = {
-    val query:Query = new Query("ArticleStub").setAncestor(subscription.entity.getKey).addSort("updated", SortDirection.ASCENDING).addFilter("read", Query.FilterOperator.EQUAL, false)
+  def getArticleStubsForSubscription(subscriptionKey:Key, n_results:Integer, datastore:DatastoreService):Iterable[ArticleStub] = {
+    val query:Query = new Query("ArticleStub").setAncestor(subscriptionKey).addSort("updated", SortDirection.ASCENDING).addFilter("read", Query.FilterOperator.EQUAL, false)
 
     val result:PreparedQuery = datastore.prepare(query)
     return result.asIterable(FetchOptions.Builder.withLimit(n_results)).asScala.map( (entity:Entity) => new ArticleStub(entity) )

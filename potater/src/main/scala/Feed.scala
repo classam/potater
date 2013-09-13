@@ -93,10 +93,11 @@ class Feed( val url: String,                    // http://curtis.lassam.net/feed
 }
 
 object Feed {
+  def generateKey(url:String):Key = { KeyFactory.createKey("Feed", url)  }
   def get(url:String, datastore:DatastoreService):Option[Feed] = {
-    return Feed.get(KeyFactory.createKey("Feed", url), datastore)
+    Feed.get(generateKey(url), datastore)
   }
-  def get( key:Key, datastore:DatastoreService ):Option[Feed] = {
+  def get(key:Key, datastore:DatastoreService):Option[Feed] = {
     try{
       return Option.apply(new Feed( datastore.get(key) ));
     }

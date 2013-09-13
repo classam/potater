@@ -53,8 +53,9 @@ class User( val username:String, entity_constructor:Option[Entity] ) extends Has
 }
 
 object User {
+  def generateKey( username:String ):Key = { KeyFactory.createKey("User", username) }
   def get( username:String, datastore:DatastoreService ):Option[User] = {
-    return User.get(KeyFactory.createKey("User", username), datastore)
+    return User.get(generateKey(username), datastore)
   }
   def get( key:Key, datastore:DatastoreService ):Option[User] = {
     try{

@@ -16,12 +16,8 @@ import net.liftweb.json._
 class Subscription( val userKey:Key, val feedKey:Key, val isNew:Boolean, val unread:Integer, val category:String, entity_constructor: Option[Entity] ) extends HasJsonObject{
   private var priv_entity:Option[Entity] = entity_constructor
 
-  def this( user:User, feed:Feed ){
-    this( user.entity.getKey(), feed.entity.getKey(), true, 0, "Default", None )
-  }
-
-  def this( user:User, feed:Feed, category:String ){
-    this( user.entity.getKey(), feed.entity.getKey(), true, 0, category, None )
+  def this( userk:Key, feedk:Key ){
+    this( userk, feedk, true, 0, "Default", None )
   }
 
   def this( entity_constructor:Entity ){
@@ -42,6 +38,9 @@ class Subscription( val userKey:Key, val feedKey:Key, val isNew:Boolean, val unr
 
   def changeUnread( unread:Integer):Subscription = {
     entity.setUnindexedProperty("unread", unread)
+    if( isNew ){
+      entity.setUnindexedProperty("new", false)
+    }
     return new Subscription( entity )
   }
 
@@ -61,17 +60,17 @@ class Subscription( val userKey:Key, val feedKey:Key, val isNew:Boolean, val unr
 }
 
 object Subscription {
-  def generateKey(user_key:Key, feed_key:Key):String = { user_key.toString+"%%"+feed_key.toString }
+  def generateKey(username:String, url:String):Key = { 
+    generateKey( User.generateKey(username), Feed.generateKey(url)) 
+  } 
+  def generateKey(user_key:Key, feed_key:Key):Key = { 
+    KeyFactory.createKey("Subscription", user_key.toString+"%%"+feed_key.toString)
+  }
+  def get(username:String, url:String, datastore:DatastoreService):Option[Subscription] = { 
+    get( generateKey(username, url))
+  }
   def get(user:User, feed:Feed, datastore:DatastoreService):Option[Subscription] = {
-    try{
-      var entity = datastore.get(KeyFactory.createKey("Subscription", Subscription.generateKey(user.entity.getKey, feed.entity.getKey)))
-      return Option.apply(new Subscription( entity ));
-    }
-    catch{
-      case e:EntityNotFoundException => {
-        return None
-      }
-    }
+    get( generateKey(user.entity.getKey, feed.entity.getKey))
   }
   def get(subscriptionKey:Key, datastore:DatastoreService):Option[Subscription] = {
     try{
@@ -84,8 +83,8 @@ object Subscription {
       }
     }
   }
-  def create(user:User, feed:Feed, datastore:DatastoreService):Subscription = {
-    var subscription = new Subscription(user, feed)
+  def create(username:String, url:String, datastore:DatastoreService):Subscription = {
+    var subscription = new Subscription(User.generateKey(username), Feed.generateKey(url))
     datastore.put(subscription.entity)
     return subscription;
   }
@@ -96,5 +95,13 @@ object Subscription {
     val query:Query = new Query("Subscription").addFilter( "feed_key", FilterOperator.EQUAL, feedKey )
     val result:PreparedQuery = datastore.prepare(query)
     return result.asIterable.asScala.map( (entity:Entity) => new Subscription(entity))
+  }
+  def getSubscriptionsForUser(username:String, datastore:DatastoreService):Iterable[Subscription] = {
+    return getSubscriptionsForUser(KeyFactory.createKey("User", username), datastore )
+  }
+  def getSubscriptionsForUser(userKey:Key, datastore:DatastoreService):Iterable[Subscription] = {
+    val query:Query = new Query("Subscription").setAncestor(userKey)
+    val result:PreparedQuery = datastore.prepare(query)
+    return result.asIterable.asScala.map( (entity:Entity) => new Subscription(entity) )
   }
 }
