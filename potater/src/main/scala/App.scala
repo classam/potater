@@ -64,7 +64,6 @@ class App extends unfiltered.filter.Plan {
         feed = feed.updated(syn)
       }
       catch{
-        // TODO: This times out really easily. I think treating it like a Task might fix that?
         case e:java.net.SocketTimeoutException => { feed = feed.broken(e.getMessage) }
         case e:java.io.IOException => { feed = feed.broken(e.getMessage) } 
         case e:Exception => { feed = feed.broken(e.getMessage) }
