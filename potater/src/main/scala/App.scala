@@ -19,6 +19,11 @@ class App extends unfiltered.filter.Plan {
 
   val JSON = new ResponseHeader("Content-Type", "application/json" :: Nil)
   val datastore:DatastoreService = DatastoreServiceFactory.getDatastoreService();
+  val queue:Queue = QueueFactory.getDefaultQueue();
+
+  def queueFeed( feedUrl:String ){
+    queue.add(withUrl("/process/"+feedUrl))
+  }
 
   def intent = homeIntent.onPass(userIntent.onPass(processingIntent.onPass(subscriptionIntent.onPass(feedIntent.onPass(teapotIntent)))))
 
@@ -29,7 +34,17 @@ class App extends unfiltered.filter.Plan {
   }
   
   def processingIntent = unfiltered.filter.Intent {
-    // TODO: POST /process : load all feeds into Queue
+    // GET /process : look at the top n feeds in the queue
+    case GET(Path(Seg("process" :: n :: nil))) => {
+      val feeds:Iterable[Feed] = Feed.getFeedsByLastCheck( n.toInt, datastore )
+      JSON ~> ResponseString( HasJsonObject.listJson(feeds) )
+    }
+    // POST /process : load the top n feeds into Queue
+    case POST(Path(Seg("process" :: n :: nil))) => {
+      val feeds:Iterable[Feed] = Feed.getFeedsByLastCheck( n.toInt, datastore )
+      feeds.map( (x:Feed)=>{ queueFeed(x.url) } )
+      JSON ~> ResponseString( HasJsonObject.listJson(feeds) )
+    }
     // GET /process/http://curtis.lassam.net/feed.xml : check this feed.
     case POST(Path(Seg("process" :: tail))) => {
       val url = tail.mkString("/")
@@ -113,9 +128,7 @@ class App extends unfiltered.filter.Plan {
 
         subscription = Option.apply( Subscription.create( username, url, datastore )) 
 
-        // Now add the subscription to the processing queue. 
-        val queue:Queue = QueueFactory.getDefaultQueue();
-        queue.add(withUrl("/process/"+url))
+        queueFeed(url)
       }
       JSON ~> ResponseString( subscription.get.json )
     }

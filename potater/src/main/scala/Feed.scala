@@ -2,8 +2,11 @@ package net.lassam
 
 import net.lassam._
 
-import com.google.appengine.api.datastore.{Entity, Text, DatastoreService, KeyFactory, Key, EntityNotFoundException}
+import com.google.appengine.api.datastore._
+import com.google.appengine.api.datastore.Query
+import com.google.appengine.api.datastore.Query._
 import java.util.{Date => OldDate}
+import scala.collection.JavaConverters._
 import org.joda.time._
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
@@ -106,6 +109,11 @@ object Feed {
         return None
       }
     }
+  }
+  def getFeedsByLastCheck(n_results:Integer, datastore:DatastoreService):Iterable[Feed] = {
+    val query:Query = new Query("Feed").addSort("lastCheck", SortDirection.DESCENDING)
+    val result:PreparedQuery = datastore.prepare(query)
+    return result.asIterable(FetchOptions.Builder.withLimit(n_results)).asScala.map( (entity:Entity) => new Feed(entity) )
   }
   def create(url:String, datastore:DatastoreService):Feed = {
     var feed = new Feed(url)
