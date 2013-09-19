@@ -65,6 +65,19 @@ object ArticleStub{
   def generateKey( subscriptionKey:Key, guid:String ):Key = { 
     KeyFactory.createKey("ArticleStub", guid + "%%" + subscriptionKey.toString)
   }
+  def get( guid:String, url:String, datastore:DatastoreService):Option[ArticleStub] = { 
+    get( generateKey( Subscription.generateKey(url), guid )
+  }
+  def get( articleKey:Key, datastore:DatastoreService):ArticleStub = {
+    try{ 
+      return Option.apply(new ArticleStub( datastore.get(articleKey) ) ));
+    }
+    catch{
+      case e:EntityNotFoundException =>{
+        return None
+      }
+    }
+  }
   def create(article:Article, subscription:Subscription, datastore:DatastoreService):ArticleStub = {
     val articleStub = new ArticleStub(article, subscription)
     datastore.put(articleStub.entity)

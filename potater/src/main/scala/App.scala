@@ -168,7 +168,16 @@ class App extends unfiltered.filter.Plan {
       val json = HasJsonObject.listJson( ArticleStub.getArticleStubsForSubscription( Subscription.generateKey(username, url), 1000, datastore ))
       JSON ~> ResponseString( json )
     }
-    // TODO: GET /users/classam/articles/1238382932/http://curtis.lassam.net/feed.xml : show article details  
+    // GET /users/classam/articles/1238382932/http://curtis.lassam.net/feed.xml : show article details  
+    case GET(Path(Seg("users" :: username :: "articles" :: article_code ))) if Auth.check(username) => { 
+      val article = ArticleStub.get(article_code, datastore)
+      if( article.isDefined ){
+        JSON ~> ResponseString( article.json )
+      }
+      else{
+        NotFound ~> ResponseString( "ArticleStub not found." )
+      }
+    }
     // TODO: POST /users/classam/articles/1238382932/http://curtis.lassam.net/feed.xml : set article to "read" 
     // TODO: GET /users/classam/articles/bycategory/tech : Get ArticleStubs by subscription category
 
