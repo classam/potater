@@ -169,10 +169,11 @@ class App extends unfiltered.filter.Plan {
       JSON ~> ResponseString( json )
     }
     // GET /users/classam/articles/1238382932/http://curtis.lassam.net/feed.xml : show article details  
-    case GET(Path(Seg("users" :: username :: "articles" :: article_code ))) if Auth.check(username) => { 
-      val article = ArticleStub.get(article_code, datastore)
+    case GET(Path(Seg("users" :: username :: "articles" :: guid :: tail ))) if Auth.check(username) => { 
+      val url = tail.mkString("/")
+      val article = ArticleStub.get(username, guid, url, datastore)
       if( article.isDefined ){
-        JSON ~> ResponseString( article.json )
+        JSON ~> ResponseString( article.get.json )
       }
       else{
         NotFound ~> ResponseString( "ArticleStub not found." )

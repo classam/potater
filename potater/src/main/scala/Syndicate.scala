@@ -84,7 +84,7 @@ object Syndicate{
       Option.apply(fmt.parseDateTime(s));
     }
     catch{
-      case _ => None
+      case _:Throwable => None
     }
   }
   def laterOfTwoDateTimes(x:Option[DateTime], y:Option[DateTime]):Option[DateTime] = {

@@ -65,12 +65,12 @@ object ArticleStub{
   def generateKey( subscriptionKey:Key, guid:String ):Key = { 
     KeyFactory.createKey("ArticleStub", guid + "%%" + subscriptionKey.toString)
   }
-  def get( guid:String, url:String, datastore:DatastoreService):Option[ArticleStub] = { 
-    get( generateKey( Subscription.generateKey(url), guid )
+  def get( username:String, guid:String, url:String, datastore:DatastoreService):Option[ArticleStub] = { 
+    get( generateKey( Subscription.generateKey(username, url), guid ), datastore )
   }
-  def get( articleKey:Key, datastore:DatastoreService):ArticleStub = {
+  def get( articleKey:Key, datastore:DatastoreService):Option[ArticleStub] = {
     try{ 
-      return Option.apply(new ArticleStub( datastore.get(articleKey) ) ));
+      return Option.apply(new ArticleStub( datastore.get(articleKey) ) );
     }
     catch{
       case e:EntityNotFoundException =>{
