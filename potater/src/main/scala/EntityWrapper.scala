@@ -2,35 +2,16 @@ package net.lassam
 
 import net.lassam._
 
-import scala.collection.JavaConverters._
-import java.util.{Date => OldDate}
-
 import scala.language.dynamics
+import org.joda.time._
+import java.util.{Date => OldDate}
 
 import com.google.appengine.api.datastore._
 import com.google.appengine.api.datastore.Query
 import com.google.appengine.api.datastore.Query._
-import org.joda.time._
+
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
-
-/*
-class QQ{
-}
-
-class Databarge[T <: EntityWrapper]( datastore:Datastore ){
-
-  def create(key:Key, obj:T){
-
-  }
-  def get(key:Key):Option[T] = {
-
-  }
-  def query(query:QQ):Iterable[T] = {
-
-  }
-}
-*/
 
 sealed abstract class Property (val name:String)
   case class IndexedStringProperty(c_name:String) extends Property(c_name)
@@ -143,4 +124,3 @@ abstract class EntityWrapper(entity_constructor:Option[Entity]) extends Dynamic 
     properties.map(selectJson).reduce( (left:JObject, right:JObject) => {left ~ right} ) 
   }
 }
-
