@@ -11,58 +11,41 @@ import org.joda.time._
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 
-class Article( val feedKey:Key,
-               val title:String, 
-               val url:String,
-               val summary:String,
-               val content:String,
-               val guid:String,
-               val updated:DateTime, 
-               entity_constructor: Option[Entity] ) extends HasJsonObject {
-  private var priv_entity:Option[Entity] = entity_constructor
+class Article( ent:Option[Entity] ) extends EntityWrapper(ent) {
 
-  def this(feedKey:Key, title:String, url:String, summary:String, content:String, guid:String, updated:DateTime){
-    this(feedKey, title, url, summary, content, guid, updated, None)
+  def this(){ this(None) } 
+
+  def properties:List[Property] = {
+    IndexedStringProperty("guid") ::
+    IndexedDateTimeProperty("updated") ::
+    StringProperty("title") ::
+    StringProperty("url") ::
+    TextProperty("summary") ::
+    TextProperty("content") :: 
+    KeyProperty("feedkey") :: 
+    Nil
+  }
+  def entityName:String = "Article"
+  def keyString:String = { Article.generateKeyString( self.feedkey, self.guid ) }
+  def parentKey:Option[Key] = None
+ 
+  def importSyndicate(item:SyndicateItem){
+    self.title = item.title
+    self.link = item.link
+    self.summary = item.summary
+    self.content = item.content
+    self.guid = item.guid
+    self.updated = Article.defaultDateTime( item.updated )
   }
 
-  def this(feedKey:Key, item:SyndicateItem){
-    this(feedKey, item.title, item.link, item.summary, item.content, item.guid, Article.defaultDateTime(item.updatedDateTime), None)
-  }
-  def this(entity_constructor:Entity){
-    this( entity_constructor.getProperty("feedKey").asInstanceOf[Key], 
-          entity_constructor.getProperty("title").asInstanceOf[String],
-          entity_constructor.getProperty("url").asInstanceOf[String],
-          entity_constructor.getProperty("summary").asInstanceOf[Text].getValue, 
-          entity_constructor.getProperty("content").asInstanceOf[Text].getValue, 
-          entity_constructor.getProperty("guid").asInstanceOf[String], 
-          new DateTime(entity_constructor.getProperty("updated").asInstanceOf[OldDate]),
-          Option.apply(entity_constructor) )
-  }
-  
-  def jsonObject = { ("title"->title) ~ ("url"->url) ~ ("summary"->summary) ~
-                     ("content"->content) ~ ("guid"->guid) ~ ("updated"->updated.toString()) ~
-                     ("feedKey"->feedKey.toString()) }
-  
-  def entity:Entity = priv_entity.isDefined match {
-    case true => { priv_entity.get }
-    case false => { 
-      var ent:Entity = new Entity("Article", feedKey.toString() + "%%" + guid, feedKey) 
-      ent.setProperty("guid", guid )
-      ent.setProperty("updated", updated.toDate )
-      ent.setUnindexedProperty("title", title)
-      ent.setUnindexedProperty("url", url)
-      ent.setUnindexedProperty("summary", new Text(summary))
-      ent.setUnindexedProperty("content", new Text(content))
-      ent.setUnindexedProperty("feedKey", feedKey)
-      priv_entity = Option.apply(ent)
-      return priv_entity.get;
-    }
-  }
 }
 
 object Article {
+  def generateKeyString( feedKey:Key, guid:String ):String = {
+    return feedKey.toString() + "%%" + guid
+  }
   def generateKey( feedKey:Key, guid:String ):Key = {
-    KeyFactory.createKey("Article", feedKey.toString() + "%%" + guid)
+    KeyFactory.createKey(generateKeyString(feedKey, guid))
   }
   def defaultDateTime(datetime:Option[DateTime]):DateTime = datetime.isDefined match {
     case true => { datetime.get }
